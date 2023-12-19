@@ -1,15 +1,16 @@
 #ifndef SIMPLETIMELINE_H
 #define SIMPLETIMELINE_H
 
-#include <QQuickItem>
 #include <QObject>
 #include <QtQuick/QQuickPaintedItem>
 #include <QPropertyAnimation>
 #include <QParallelAnimationGroup>
 #include <QSequentialAnimationGroup>
 #include <vector>
+#include "MyAnimationGroup.h"
 
-class SimpleTimeline : public QQuickItem
+
+class SimpleTimeline : public QObject
 {
     Q_OBJECT
     QML_ELEMENT
@@ -21,14 +22,13 @@ public slots:
     }
 
 
-    void createAnimate(QObject *target, const QByteArray &propertyName, QString name, int msecs);
-    void addFrame(QString name, int index, qreal step, const QVariant &value);
-    void addFrame(QString name, qreal step, const QVariant &value);
+    void createAnimate(QObject *target, QString name);
+    void addFrame(QObject *target, const QByteArray &propertyName, QString name, const QVariant &value, int type, qreal time);
 
     void start();
 
 public:
-    explicit SimpleTimeline(QQuickItem *parent = nullptr);
+    explicit SimpleTimeline(QObject *parent = nullptr);
     ~SimpleTimeline(); // 在析构函数中释放动态分配的内存
 
 private slots:
@@ -42,7 +42,8 @@ signals:
     void animationFinished();
 private:
     QParallelAnimationGroup parGroup;
-    std::map<QString, QSequentialAnimationGroup*> seqGroup;
+//    std::map<QString, QSequentialAnimationGroup*> seqGroup;
+    std::vector<MyAnimationGroup> seqGroup;
     std::vector<QPropertyAnimation*> animation;
 
 };
