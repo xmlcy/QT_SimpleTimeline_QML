@@ -24,6 +24,8 @@ public slots:
 
     void createAnimate(QObject *target, QString name);
     void addFrame(QObject *target, const QByteArray &propertyName, QString name, const QVariant &value, int type, qreal time);
+    void deleteFrame(QString name, qreal time);
+    void updateFrame(QString name, const QVariant &value, int type, qreal time);
 
     void start();
 

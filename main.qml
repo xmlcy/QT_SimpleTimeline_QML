@@ -56,15 +56,21 @@ Window {
 //        stimeline.addFrame("xani", 0, 0.5, 0)
 //        stimeline.addFrame("xani", 0, 1, 140)
         stimeline.createAnimate(rectangle, "xani")
-        stimeline.addFrame(rectangle, "x", "xani", 220,  1,    0)
+//        stimeline.addFrame(rectangle, "x", "xani", 220,  1,    0)
         stimeline.addFrame(rectangle, "x", "xani", 100,  1,  200)
         stimeline.addFrame(rectangle, "x", "xani",   0,  1,  500)
+        stimeline.addFrame(rectangle, "x", "xani", 400,  1,  700)
         stimeline.addFrame(rectangle, "x", "xani", 220,  1, 1000)
+        stimeline.updateFrame("xani", 100, 1, 1000)
+        stimeline.deleteFrame("xani", 700)
         stimeline.createAnimate(rectangle, "yani")
-        stimeline.addFrame(rectangle, "y", "yani", 140,  1,    0)
+//        stimeline.addFrame(rectangle, "y", "yani", 140,  1,    0)
         stimeline.addFrame(rectangle, "y", "yani", 100,  1,  200)
         stimeline.addFrame(rectangle, "y", "yani",   0,  1,  500)
+        stimeline.addFrame(rectangle, "y", "yani", 300,  1,  700)
         stimeline.addFrame(rectangle, "y", "yani", 140,  1, 1000)
+        stimeline.updateFrame("yani", 100, 1, 1000)
+        stimeline.deleteFrame("yani", 700)
     }
 
 }

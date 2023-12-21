@@ -104,10 +104,10 @@ void SimpleTimeline::addFrame(QObject *target, const QByteArray &propertyName, Q
             animation->setEasingCurve(static_cast<QEasingCurve::Type>(type));
             animation->setKeyValueAt(1,value);
             auto it1 = it->times.begin();
-            it->times.insert((it1+1),time);
+            //在第ani_position+1后加
+            it->times.insert((it1+ani_position+1),time);
 
             //修改后一个帧的持续时间
-            QPropertyAnimation *animationafter =  qobject_cast<QPropertyAnimation*>(animationGroup->animationAt(ani_position+1));
             qreal timeafter = it->times[ani_position+2];
             qDebug() << "timeafter:" << timeafter;
             QPropertyAnimation *absAni = qobject_cast<QPropertyAnimation*>(it->seqAnimation->animationAt(ani_position+1));
@@ -120,6 +120,112 @@ void SimpleTimeline::addFrame(QObject *target, const QByteArray &propertyName, Q
         }
     } else {
         qDebug() << "Key" << name << "does not exist.";
+    }
+}
+
+//name是串名，time是时间点
+void SimpleTimeline::deleteFrame(QString name, qreal time)
+{
+    //根据串名找到串
+    auto it = seqGroup.begin();
+    int ani_position = -1; // 初始化位置为-1，表示未找到
+    int flag = 0;
+    // 根据名字从所有串中检索是否有串行动画组可用
+    while (it != seqGroup.end()){
+        if(it->seqGroupName == name)
+            flag = 1;
+        it++;
+    }
+    it--;
+    if (flag == 1)
+    {
+        //获取串上所有时间
+        std::vector<int> times(it->times);
+        //找到传回的时间在times中的位置
+        int t = -1;
+        for (int i = 0; i < times.size(); ++i)
+        {
+            qDebug() << "t:" << t << "times[i]" << times[i];
+            if(time == times[i]){
+                t = i;
+            }
+
+        }
+        qDebug() << "t=" << t;
+        //删除帧为最后一帧
+        if (t == times.size()-1)
+        {
+            qDebug() << "删除最后一帧";
+            it->seqAnimation->takeAnimation(t);
+            it->times.erase(it->times.begin()+t);
+        }
+        else{
+            qDebug() << "删除第" << t+1 << "帧";
+            qreal timeafter = it->times[t+1];
+            qreal timebefor = it->times[t-1];
+            qDebug() << "timebefor:" << timebefor;
+            qDebug() << "timeafter:" << timeafter;
+            QPropertyAnimation *absAni = qobject_cast<QPropertyAnimation*>(it->seqAnimation->animationAt(ani_position+1));
+            if (absAni != NULL){
+                qDebug() << "absAni not null";
+                absAni->setDuration(timeafter-timebefor);
+            }
+            it->seqAnimation->takeAnimation(t);
+            auto it1 = it->times.begin();
+            it->times.erase(it1+t);
+        }
+        for (int i = 0; i < it->times.size(); ++i)
+        {
+            qDebug() << "删除元素后times[i]" << it->times[i];
+        }
+    }
+}
+
+void SimpleTimeline::updateFrame(QString name, const QVariant &value, int type, qreal time)
+{
+    //根据串名找到串
+    auto it = seqGroup.begin();
+    int ani_position = -1; // 初始化位置为-1，表示未找到
+    int flag = 0;
+    // 根据名字从所有串中检索是否有串行动画组可用
+    while (it != seqGroup.end()){
+        if(it->seqGroupName == name)
+            flag = 1;
+        it++;
+    }
+    it--;
+    if (flag == 1)
+    {
+        //获取串上所有时间
+        std::vector<int> times(it->times);
+        //找到传回的时间在times中的位置
+        int t = -1;
+        for (int i = 0; i < times.size(); ++i)
+        {
+            qDebug() << "t:" << t << "times[i]" << times[i];
+            if(time == times[i]){
+                t = i;
+            }
+
+        }
+        qDebug() << "t=" << t;
+        it->times[t] = time;
+        qDebug() << "修改第" << t+1 << "帧";
+        qreal timeafter = it->times[t+1];
+        qreal timebefor = it->times[t-1];
+        qDebug() << "timebefor:" << timebefor;
+        qDebug() << "timeafter:" << timeafter;
+        QPropertyAnimation *absAni = qobject_cast<QPropertyAnimation*>(it->seqAnimation->animationAt(t));
+        if (absAni != NULL){
+            qDebug() << "absAni not null";
+            absAni->setDuration(time-timebefor);
+            absAni->setKeyValueAt(1,value);
+            absAni->setEasingCurve(static_cast<QEasingCurve::Type>(type));
+        }
+        QPropertyAnimation *absAni1 = qobject_cast<QPropertyAnimation*>(it->seqAnimation->animationAt(t+1));
+        if (absAni1 != NULL){
+            absAni1->setDuration(timeafter-time);
+        }
     }
 }
 
