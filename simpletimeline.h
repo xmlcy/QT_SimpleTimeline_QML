@@ -28,6 +28,7 @@ public slots:
     void updateFrame(QString name, const QVariant &value, int type, qreal time);
 
     void start();
+    void stop();
 
 public:
     explicit SimpleTimeline(QObject *parent = nullptr);

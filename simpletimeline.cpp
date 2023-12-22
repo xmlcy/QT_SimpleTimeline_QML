@@ -36,7 +36,7 @@ SimpleTimeline::SimpleTimeline(QObject *parent)
 }
 
 void SimpleTimeline::createAnimate(QObject *target, QString name){
-    qDebug() << "进入createAnimate";
+//    qDebug() << "进入createAnimate";
     // 创建串行动画组
     QSequentialAnimationGroup *seqAnimation = new QSequentialAnimationGroup(this);
     std::vector<int> times;
@@ -44,6 +44,7 @@ void SimpleTimeline::createAnimate(QObject *target, QString name){
     seqGroup.push_back(animationgroup);
     // 将串行动画组添加到并行动画组中
     parGroup.addAnimation(seqAnimation);
+    qDebug() << name << "创建成功";
 }
 
 //target指将动画绑定在谁身上，name是串名字，value是传过来的值，type是曲线类型, time是此帧的时间点
@@ -54,13 +55,15 @@ void SimpleTimeline::addFrame(QObject *target, const QByteArray &propertyName, Q
     int flag = 0;
     // 根据名字从所有串中检索是否有串行动画组可用
     while (it != seqGroup.end()){
-        if(it->seqGroupName == name)
+        if(it->seqGroupName == name) {
             flag = 1;
+            break;
+        }
         it++;
     }
-    it--;
     if (flag == 1)
     {
+        qDebug() << "Key" << it->seqGroupName;
         //获取串
         QSequentialAnimationGroup *animationGroup = it->seqAnimation;
         //获取串上每个帧的时间点
@@ -234,6 +237,11 @@ void SimpleTimeline::updateFrame(QString name, const QVariant &value, int type, 
 void SimpleTimeline::start()
 {
     parGroup.start();
+}
+
+void SimpleTimeline::stop()
+{
+    parGroup.stop();
 }
 
 

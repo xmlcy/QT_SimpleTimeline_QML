@@ -8,8 +8,13 @@ FluRectangle {
     width: 1280
     height: 220
 
-    signal addAni
+    signal addTimeline
     signal editTimeline
+    signal startTimeline
+    signal stopTimeline
+    signal addframe
+
+    property int frameNow: frameLine.x
 
     FluRectangle {
         id: menuRec
@@ -17,7 +22,7 @@ FluRectangle {
         y: 0
         width: parent.width
         height: 30
-//        color: "#8a8a8a"
+        color: "#8a8a8a"
 
         FluText {
             id: menuTitle
@@ -45,7 +50,7 @@ FluRectangle {
             iconSource:FluentIcons.Add
             iconSize: 8
             onClicked: {
-                root.addAni()
+                root.addTimeline()
             }
         }
 
@@ -68,6 +73,31 @@ FluRectangle {
             y: 9
             text: qsTr("1000")
             font.pixelSize: 10
+        }
+
+        FluIconButton {
+            id: start
+            x: 440
+            y: 3
+            width: 24
+            height: 24
+            iconSource:FluentIcons.Play
+            iconSize: 8
+            onClicked: {
+                root.startTimeline()
+            }
+        }
+        FluIconButton {
+            id: stop
+            x: 460
+            y: 3
+            width: 24
+            height: 24
+            iconSource:FluentIcons.Stop
+            iconSize: 8
+            onClicked: {
+                root.stopTimeline()
+            }
         }
 
         FluComboBox{
@@ -146,8 +176,8 @@ FluRectangle {
                         width: 200
                         height: 28
                         color: "#404040"
-//                        border.color: "#ffffff"
-//                        border.width: 2
+                        //                        border.color: "#ffffff"
+                        //                        border.width: 2
                     }
 
                     FluRectangle {
@@ -157,8 +187,8 @@ FluRectangle {
                         width: 344
                         height: 28
                         color: "#404040"
-//                        border.color: "#ffffff"
-//                        border.width: 2
+                        //                        border.color: "#ffffff"
+                        //                        border.width: 2
                     }
                 }
 
@@ -205,6 +235,109 @@ FluRectangle {
                     width: parent.width
                     height: 30
                     color: "#c9c9c9"
+                }
+            }
+
+            Repeater {
+                model: keyPointsModel
+
+                Rectangle {
+                    width: 10
+                    height: 10
+                    color: "red"
+                    radius: width / 2
+                    x: model.x
+                    y: model.y
+                    visible: model.visible
+                }
+            }
+        }
+
+        ScrollView {
+            id: scrollView2
+            x: 200
+            y: 0
+            width: parent.width-x
+            height: 40
+            //            clip: true // 确保内容在边界内显示
+            ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+            ScrollBar.vertical.policy: ScrollBar.AlwaysOff
+
+            Flickable {
+                id: flickableScrollView2
+                contentWidth: 0
+                contentHeight: 0
+                interactive: false // 禁用鼠标滑动
+                contentX: flickableScrollView.contentX
+
+                //                onContentYChanged: {
+                //                    // 当 ScrollView 2 滚动时，同步 ScrollView 1 的滚动位置
+                //                    flickableScrollView.contentY = contentY;
+                //                }
+
+            }
+
+            //            FluRectangle {
+            //                id: recTimeruler
+            //                x: 0
+            //                y: 0
+            //                width: parent.width
+            //                height: 40
+            //                color: "#aeaeae"
+
+            //                Text {
+            //                    id: text1
+            //                    x: 605
+            //                    y: 8
+            //                    text: qsTr("100")
+            //                    font.pixelSize: 20
+            //                }
+            //            }
+            TimelineRuler {
+                id: ruler
+                x: 0
+                y: 0
+                width: 8000
+                height: 40
+
+                startYear: 0
+                endYear: 200
+            }
+
+            Rectangle {
+                x: 300
+                id: frameLine
+                width: 2
+                height: frameView.height
+                color: "#343434"
+                onXChanged: {
+                    if (x < 0) {
+                        x = 0
+                    } else if (x > ruler.width) {
+                        x = 0
+                    }
+                }
+
+                Rectangle {
+                    id: frameLineTop
+                    width: 6
+                    height: 6
+                    color: "#000000"
+                    anchors.left: frameLine.horizontalCenter
+                    anchors.top: frameLine.top
+                    anchors.leftMargin: -3
+                    anchors.topMargin: 0
+                }
+
+                MouseArea {
+                    id: mouseArea
+                    anchors.fill: parent
+                    anchors.bottomMargin: -5
+                    anchors.rightMargin: -5
+                    anchors.leftMargin: -5
+                    anchors.topMargin: -5
+                    drag.target: frameLine
+                    drag.axis: Drag.XAxis
                 }
             }
         }
@@ -289,58 +422,38 @@ FluRectangle {
             }
         }
 
-        ScrollView {
-            id: scrollView2
-            x: 200
-            y: 0
-            width: parent.width-x
-            height: 40
-            clip: true // 确保内容在边界内显示
-            ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
-            ScrollBar.vertical.policy: ScrollBar.AlwaysOff
-
-            Flickable {
-                id: flickableScrollView2
-                contentWidth: 0
-                contentHeight: 0
-                interactive: false // 禁用鼠标滑动
-                contentX: flickableScrollView.contentX
-
-                //                onContentYChanged: {
-                //                    // 当 ScrollView 2 滚动时，同步 ScrollView 1 的滚动位置
-                //                    flickableScrollView.contentY = contentY;
-                //                }
-
-            }
-
-            FluRectangle {
-                id: recTimeruler
-                x: 0
-                y: 0
-                width: parent.width
-                height: 40
-                color: "#aeaeae"
-
-                Text {
-                    id: text1
-                    x: 605
-                    y: 8
-                    text: qsTr("100")
-                    font.pixelSize: 20
-                }
-            }
-        }
-
-        FluRectangle {
+        Rectangle {
             id: recTimerulerMenu
             x: 0
             y: 0
             width: 200
             height: 40
             color: "#aeaeae"
-//            border.width: 1
+            //            border.width: 1
+        }
+
+    }
+    function createKeyPoints() {
+        // 添加关键点数据到模型
+        keyPointsModel.append({x: frameLine.x-5, y: 7, visible: true});
+        // 可以根据需要添加更多关键点
+    }
+
+    FluButton {
+        id: button
+        x: 30
+        y: 65
+        text: qsTr("Add")
+        onClicked: {
+            createKeyPoints()
+            addframe()
         }
     }
+
+    ListModel {
+        id: keyPointsModel
+    }
+
 
 }
 

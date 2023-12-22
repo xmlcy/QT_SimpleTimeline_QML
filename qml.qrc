@@ -7,5 +7,6 @@
         <file>App.qml</file>
         <file>Login.qml</file>
         <file>EditTimeline.qml</file>
+        <file>TimelineRuler.qml</file>
     </qresource>
 </RCC>

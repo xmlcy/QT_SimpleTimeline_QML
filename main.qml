@@ -23,19 +23,19 @@ FluWindow {
 //        }
 //    }
 
-    MouseArea {
-        anchors.fill: parent
-        onClicked: {
-            stimeline.begin()
-            stimeline.doSomething("stimeline")
-            stimeline.animationFinished()
-            stime2.begin()
-            stime2.doSomething("stime2")
-            stime2.animationFinished()
+//    MouseArea {
+//        anchors.fill: parent
+//        onClicked: {
+//            stimeline.begin()
+//            stimeline.doSomething("stimeline")
+//            stimeline.animationFinished()
+//            stime2.begin()
+//            stime2.doSomething("stime2")
+//            stime2.animationFinished()
 
-            stimeline.start()
-        }
-    }
+//            stimeline.start()
+//        }
+//    }
 
     STimeline {
         id: stimeline
@@ -51,7 +51,7 @@ FluWindow {
             bottom: parent.bottom
             bottomMargin: 0
         }
-        onAddAni: {
+        onAddTimeline: {
             console.log("add Timeline")
             FluApp.navigate("/addTimeline")
         }
@@ -59,6 +59,23 @@ FluWindow {
             console.log("edit Timeline")
             FluApp.navigate("/editTimeline")
         }
+        onStartTimeline: {
+            console.log("start Timeline")
+            stimeline.start()
+        }
+        onStopTimeline: {
+            console.log("stop Timeline")
+            stimeline.stop()
+        }
+        onFrameNowChanged: {
+//            console.log(frameNow)
+        }
+        onAddframe: {
+            stimeline.addFrame(recAni, "x", "rxani", recAni.x,  1,  frameNow)
+            stimeline.addFrame(recAni, "y", "ryani", recAni.y,  1,  frameNow)
+            console.log(frameNow)
+        }
+
     }
 
     STimeline {
@@ -76,6 +93,20 @@ FluWindow {
         color: "#ff0000"
     }
 
+    Rectangle {
+        id: recAni
+        x: 1000
+        y: 200
+        width: 100
+        height: 100
+        color: "#ffff00"
+
+        MouseArea {
+            id: mouseArea
+            anchors.fill: parent
+            drag.target: recAni
+        }
+    }
 
     Component.onCompleted: {
         console.log("Component.onCompleted")
@@ -105,6 +136,9 @@ FluWindow {
         stimeline.addFrame(rectangle, "y", "yani", 140,  1, 1000)
         stimeline.updateFrame("yani", 100, 1, 1000)
         stimeline.deleteFrame("yani", 700)
+
+        stimeline.createAnimate(recAni, "rxani")
+        stimeline.createAnimate(recAni, "ryani")
     }
 
 }
