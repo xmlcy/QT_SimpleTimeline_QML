@@ -1,5 +1,11 @@
 <RCC>
     <qresource prefix="/">
         <file>main.qml</file>
+        <file>TimelineEditor.qml</file>
+        <file>TimelineEditorFluentUI.qml</file>
+        <file>AddTimeline.qml</file>
+        <file>App.qml</file>
+        <file>Login.qml</file>
+        <file>EditTimeline.qml</file>
     </qresource>
 </RCC>

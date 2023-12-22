@@ -44,7 +44,8 @@ else()
 endif()
 
 target_link_libraries(simpleTimeline
-  PRIVATE Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Quick)
+  PRIVATE Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Quick
+  fluentuiplugin)
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
 # If you are developing for iOS or macOS you should consider setting an
@@ -69,3 +70,5 @@ if(QT_VERSION_MAJOR EQUAL 6)
     qt_import_qml_plugins(simpleTimeline)
     qt_finalize_executable(simpleTimeline)
 endif()
+
+add_subdirectory(FluentUI)
