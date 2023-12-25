@@ -17,7 +17,7 @@ Item {
             "/addTimeline":"qrc:/AddTimeline.qml",
             "/editTimeline":"qrc:/EditTimeline.qml"
         }
-        FluApp.initialRoute = "/login"
+        FluApp.initialRoute = "/"
         FluApp.run()
     }
 }

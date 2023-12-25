@@ -21,11 +21,16 @@ public slots:
         qDebug() << text << "SimpleTimeline::doSomething() called";
     }
 
+    //串操作
+    void createAnimate(QString name);
+    void deleteAnimate(QString name);
 
-    void createAnimate(QObject *target, QString name);
+    //帧操作
     void addFrame(QObject *target, const QByteArray &propertyName, QString name, const QVariant &value, int type, qreal time);
     void deleteFrame(QString name, qreal time);
-    void updateFrame(QString name, const QVariant &value, int type, qreal time);
+    void updateFrame(QString name, const QVariant &value, int type,qreal oldtime, qreal newtime);
+    void addFrameButton(QObject *target, const QByteArray &propertyName, QString name, const QVariant &value, int type, qreal time);
+//    void recordFrame();
 
     void start();
     void stop();

@@ -35,7 +35,7 @@ SimpleTimeline::SimpleTimeline(QObject *parent)
     // 可以在这里进行一些初始化操作
 }
 
-void SimpleTimeline::createAnimate(QObject *target, QString name){
+void SimpleTimeline::createAnimate(QString name){
 //    qDebug() << "进入createAnimate";
     // 创建串行动画组
     QSequentialAnimationGroup *seqAnimation = new QSequentialAnimationGroup(this);
@@ -45,6 +45,17 @@ void SimpleTimeline::createAnimate(QObject *target, QString name){
     // 将串行动画组添加到并行动画组中
     parGroup.addAnimation(seqAnimation);
     qDebug() << name << "创建成功";
+}
+
+//删除串
+void SimpleTimeline::deleteAnimate(QString name){
+    auto it = seqGroup.begin();
+    while (it != seqGroup.end()){
+        if(it->seqGroupName == name){
+            seqGroup.erase(it);
+            parGroup.removeAnimation(it->seqAnimation);
+        }
+    }
 }
 
 //target指将动画绑定在谁身上，name是串名字，value是传过来的值，type是曲线类型, time是此帧的时间点
@@ -131,15 +142,15 @@ void SimpleTimeline::deleteFrame(QString name, qreal time)
 {
     //根据串名找到串
     auto it = seqGroup.begin();
-    int ani_position = -1; // 初始化位置为-1，表示未找到
     int flag = 0;
     // 根据名字从所有串中检索是否有串行动画组可用
     while (it != seqGroup.end()){
-        if(it->seqGroupName == name)
+        if(it->seqGroupName == name) {
             flag = 1;
+            break;
+        }
         it++;
     }
-    it--;
     if (flag == 1)
     {
         //获取串上所有时间
@@ -168,7 +179,7 @@ void SimpleTimeline::deleteFrame(QString name, qreal time)
             qreal timebefor = it->times[t-1];
             qDebug() << "timebefor:" << timebefor;
             qDebug() << "timeafter:" << timeafter;
-            QPropertyAnimation *absAni = qobject_cast<QPropertyAnimation*>(it->seqAnimation->animationAt(ani_position+1));
+            QPropertyAnimation *absAni = qobject_cast<QPropertyAnimation*>(it->seqAnimation->animationAt(t+1));
             if (absAni != NULL){
                 qDebug() << "absAni not null";
                 absAni->setDuration(timeafter-timebefor);
@@ -184,19 +195,20 @@ void SimpleTimeline::deleteFrame(QString name, qreal time)
     }
 }
 
-void SimpleTimeline::updateFrame(QString name, const QVariant &value, int type, qreal time)
+void SimpleTimeline::updateFrame(QString name, const QVariant &value, int type, qreal oldtime, qreal newtime)
 {
     //根据串名找到串
     auto it = seqGroup.begin();
-    int ani_position = -1; // 初始化位置为-1，表示未找到
     int flag = 0;
     // 根据名字从所有串中检索是否有串行动画组可用
     while (it != seqGroup.end()){
         if(it->seqGroupName == name)
+        {
             flag = 1;
+            break;
+        }
         it++;
     }
-    it--;
     if (flag == 1)
     {
         //获取串上所有时间
@@ -206,13 +218,14 @@ void SimpleTimeline::updateFrame(QString name, const QVariant &value, int type, 
         for (int i = 0; i < times.size(); ++i)
         {
             qDebug() << "t:" << t << "times[i]" << times[i];
-            if(time == times[i]){
+            if(oldtime == times[i]){
                 t = i;
             }
 
         }
         qDebug() << "t=" << t;
-        it->times[t] = time;
+
+        it->times[t] = newtime;
         qDebug() << "修改第" << t+1 << "帧";
         qreal timeafter = it->times[t+1];
         qreal timebefor = it->times[t-1];
@@ -221,14 +234,53 @@ void SimpleTimeline::updateFrame(QString name, const QVariant &value, int type, 
         QPropertyAnimation *absAni = qobject_cast<QPropertyAnimation*>(it->seqAnimation->animationAt(t));
         if (absAni != NULL){
             qDebug() << "absAni not null";
-            absAni->setDuration(time-timebefor);
+            absAni->setDuration(newtime-timebefor);
             absAni->setKeyValueAt(1,value);
             absAni->setEasingCurve(static_cast<QEasingCurve::Type>(type));
         }
-        QPropertyAnimation *absAni1 = qobject_cast<QPropertyAnimation*>(it->seqAnimation->animationAt(t+1));
-        if (absAni1 != NULL){
-            absAni1->setDuration(timeafter-time);
+        if (t != it->times.size()-1){
+            QPropertyAnimation *absAni1 = qobject_cast<QPropertyAnimation*>(it->seqAnimation->animationAt(t+1));
+            if (absAni1 != NULL){
+                absAni1->setDuration(timeafter-newtime);
+            }
         }
+    }
+}
+
+void SimpleTimeline::addFrameButton(QObject *target, const QByteArray &propertyName, QString name, const QVariant &value, int type, qreal time)
+{
+    //根据串名找到串
+    auto it = seqGroup.begin();
+    int flag = 0;
+    //判断是添加还是更新
+    int state = -1;
+    // 根据名字从所有串中检索是否有串行动画组可用
+    while (it != seqGroup.end()){
+        if(it->seqGroupName == name)
+        {
+            flag = 1;
+            break;
+        }
+        it++;
+    }
+    if (flag == 1)
+    {
+        for (int i = 0; i < it->times.size(); ++i)
+        {
+            if(time == it->times[i]){
+                state = i;
+            }
+        }
+    }else{
+        qDebug() << "没有对应的串";
+    }
+
+    if (state == -1){
+        qDebug() << "add animation";
+        addFrame(target, propertyName, name, value, type, time);
+    }else{
+        qDebug() << "update animation";
+        updateFrame(name, value, type, time, time);
     }
 }
 
