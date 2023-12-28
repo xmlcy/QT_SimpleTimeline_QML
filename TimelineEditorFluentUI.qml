@@ -13,8 +13,10 @@ FluRectangle {
     signal startTimeline
     signal stopTimeline
     signal addframe
+    signal recordframe
 
     property int frameNow: frameLine.x
+    property alias frameLine: mouseArea
 
     FluRectangle {
         id: menuRec
@@ -338,6 +340,7 @@ FluRectangle {
                     anchors.topMargin: -5
                     drag.target: frameLine
                     drag.axis: Drag.XAxis
+
                 }
             }
         }

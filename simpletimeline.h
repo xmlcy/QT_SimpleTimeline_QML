@@ -9,18 +9,15 @@
 #include <vector>
 #include "MyAnimationGroup.h"
 
-
 class SimpleTimeline : public QObject
 {
     Q_OBJECT
     QML_ELEMENT
+    Q_PROPERTY(double recordstate READ getrecordstate WRITE setrecordstate NOTIFY recordstateChanged FINAL)
+    Q_PROPERTY(float xnum READ getxnum WRITE setxnum NOTIFY xnumChanged FINAL)
 signals:
     void begin();
 public slots:
-    void doSomething(QString text) {
-        qDebug() << text << "SimpleTimeline::doSomething() called";
-    }
-
     //串操作
     void createAnimate(QString name);
     void deleteAnimate(QString name);
@@ -30,7 +27,7 @@ public slots:
     void deleteFrame(QString name, qreal time);
     void updateFrame(QString name, const QVariant &value, int type,qreal oldtime, qreal newtime);
     void addFrameButton(QObject *target, const QByteArray &propertyName, QString name, const QVariant &value, int type, qreal time);
-//    void recordFrame();
+    QVariant preview(QString name, qreal time);
 
     void start();
     void stop();
@@ -38,6 +35,10 @@ public slots:
 public:
     explicit SimpleTimeline(QObject *parent = nullptr);
     ~SimpleTimeline(); // 在析构函数中释放动态分配的内存
+    void setrecordstate(int state);
+    int getrecordstate();
+    float getxnum();
+    void setxnum(float x);
 
 private slots:
     void onAnimationFinished() {
@@ -48,12 +49,16 @@ private slots:
 
 signals:
     void animationFinished();
+    void recordstateChanged(int state);
+    void xnumChanged();
 private:
     QParallelAnimationGroup parGroup;
 //    std::map<QString, QSequentialAnimationGroup*> seqGroup;
     std::vector<MyAnimationGroup> seqGroup;
     std::vector<QPropertyAnimation*> animation;
-
+    int recordstate;
+    float xnum;
+    float ynum;
 };
 
 #endif // SIMPLETIMELINE_H

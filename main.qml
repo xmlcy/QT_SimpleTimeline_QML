@@ -41,6 +41,33 @@ FluWindow {
         id: stimeline
         onBegin: console.log("stimeline onBegin")
         onAnimationFinished: console.log("stimeline onAnimationFinished")
+        xnum: recAni.x
+//        onRecordstateChanged: {
+//            if (stimeline.recordstate == 1){
+//                myt.mystart();
+//                console.log("state == 1,start record")
+//                onXnumChanged: {
+//                    console.log("x changed.")
+//                    myt.mystop();
+//                    stimeline.addFrameButton(recAni, "x", "rxani", recAni.x,  1,  myt.myelapsed());
+//                    console.log("add time:",myt.myelapsed());
+//                    myt.mystart();
+//                }
+//                onYChanged: {
+//                    console.log("y changed.")
+//                    stimeline.addFrameButton(recAni, "y", "ryani", recAni.y,  1,  timlineEditor.frameNow)
+//                }
+//            }else{
+//                console.log("state == 0,end record");
+//            }
+//        }
+//        onXnumChanged: {
+//            console.log("x changed.")
+//            myt.mystop();
+//            stimeline.addFrameButton(recAni, "x", "rxani", recAni.x,  1,  myt.myelapsed());
+//            console.log("add time:",myt.myelapsed());
+//            myt.mystart();
+//        }
     }
 
     TimelineEditorFluentUI {
@@ -75,6 +102,20 @@ FluWindow {
             stimeline.addFrameButton(recAni, "y", "ryani", recAni.y,  1,  frameNow)
             console.log(frameNow)
         }
+        onRecordframe: {
+            if (stimeline.recordstate == 0){
+                stimeline.recordstate = 1;
+            }else{
+                stimeline.recordstate = 0;
+            }
+        }
+        frameLine {
+            onPositionChanged: {
+                console.log(stimeline.preview("rxani", frameNow))
+            }
+        }
+
+
 
     }
 
@@ -84,14 +125,14 @@ FluWindow {
         onAnimationFinished: console.log("stimeline onAnimationFinished")
     }
 
-    Rectangle {
-        id: rectangle
-        x: 220
-        y: 140
-        width: 200
-        height: 200
-        color: "#ff0000"
-    }
+//    Rectangle {
+//        id: rectangle
+//        x: 220
+//        y: 140
+//        width: 200
+//        height: 200
+//        color: "#ff0000"
+//    }
 
     Rectangle {
         id: recAni
@@ -99,50 +140,20 @@ FluWindow {
         y: 200
         width: 100
         height: 100
-        color: "#ffff00"
+        color: "#ff0000"
 
         MouseArea {
             id: mouseArea
             anchors.fill: parent
             drag.target: recAni
         }
+
 //        onXChanged: {
-//            stimeline.addFrame(recAni, "x", "rxani", recAni.x,  1,  timlineEditor.frameNow)
-//        }
-//        onYChanged: {
-//            stimeline.addFrame(recAni, "y", "ryani", recAni.y,  1,  timlineEditor.frameNow)
+//            console.log("x changed.==============j");
 //        }
     }
 
     Component.onCompleted: {
-//        console.log("Component.onCompleted")
-//        //        stimeline.createAnimate(rectangle, "x", "xani", 1000)
-//        //        stimeline.addFrame("xani", 0, 0, 220)
-//        //        stimeline.addFrame("xani", 0, 0.2, 100)
-//        //        stimeline.addFrame("xani", 0, 0.5, 0)
-//        //        stimeline.addFrame("xani", 0, 1, 220)
-//        //        stimeline.createAnimate(rectangle, "y", "xani", 1000)
-//        //        stimeline.addFrame("xani", 0, 0, 140)
-//        //        stimeline.addFrame("xani", 0, 0.2, 100)
-//        //        stimeline.addFrame("xani", 0, 0.5, 0)
-//        //        stimeline.addFrame("xani", 0, 1, 140)
-//        stimeline.createAnimate(rectangle, "xani")
-//        //        stimeline.addFrame(rectangle, "x", "xani", 220,  1,    0)
-//        stimeline.addFrame(rectangle, "x", "xani", 100,  1,  200)
-//        stimeline.addFrame(rectangle, "x", "xani",   0,  1,  500)
-//        stimeline.addFrame(rectangle, "x", "xani", 400,  1,  700)
-//        stimeline.addFrame(rectangle, "x", "xani", 220,  1, 1000)
-//        stimeline.updateFrame("xani", 100, 1, 1000)
-//        stimeline.deleteFrame("xani", 700)
-//        stimeline.createAnimate(rectangle, "yani")
-//        //        stimeline.addFrame(rectangle, "y", "yani", 140,  1,    0)
-//        stimeline.addFrame(rectangle, "y", "yani", 100,  1,  200)
-//        stimeline.addFrame(rectangle, "y", "yani",   0,  1,  500)
-//        stimeline.addFrame(rectangle, "y", "yani", 300,  1,  700)
-//        stimeline.addFrame(rectangle, "y", "yani", 140,  1, 1000)
-//        stimeline.updateFrame("yani", 100, 1, 1000)
-//        stimeline.deleteFrame("yani", 700)
-
         stimeline.createAnimate("rxani")
         stimeline.createAnimate("ryani")
     }

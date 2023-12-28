@@ -1,38 +1,11 @@
-//#include "simpletimeline.h"
-
-
-//SimpleTimeline::SimpleTimeline(QObject *parent)
-//    : QObject{parent}
-//{
-
-//}
-
-
-
-//void SimpleTimeline::createAnimate(QObject *target, const QByteArray &propertyName)
-//{
-//    QSequentialAnimationGroup seqGroup;
-//    seqGroup_.push_back(seqGroup);
-
-//    QPropertyAnimation *animation = new QPropertyAnimation(target, propertyName);
-//    seqGroup.addAnimation(animation);
-
-//    parGroup_.addAnimation(&seqGroup_[0]);
-
-
-//}
-
-
-// simpletimeline.cpp
-
 #include "simpletimeline.h"
+
 typedef QPair<qreal, QVariant> KeyValue;
 typedef QList<KeyValue> KeyValues;
 
 SimpleTimeline::SimpleTimeline(QObject *parent)
     : QObject(parent)
 {
-    // 可以在这里进行一些初始化操作
 }
 
 void SimpleTimeline::createAnimate(QString name){
@@ -111,8 +84,13 @@ void SimpleTimeline::addFrame(QObject *target, const QByteArray &propertyName, Q
         } else {
             //新帧为第一个且后边还有其他帧时 或 插在中间位置前后都有帧时
             qDebug() << "给定的时间点在序列动画组的第" << ani_position + 1 << "个动画之后";
+            qreal timebefor;
             QPropertyAnimation *animation = new QPropertyAnimation(target,propertyName);
-            qreal timebefor = times[ani_position];
+            if (ani_position == -1) {
+                timebefor = 0;
+            }else{
+                timebefor = times[ani_position];
+            }
             qDebug() << "timebefor:" << timebefor;
             animation->setDuration(time-timebefor);
             animation->setEasingCurve(static_cast<QEasingCurve::Type>(type));
@@ -247,6 +225,85 @@ void SimpleTimeline::updateFrame(QString name, const QVariant &value, int type, 
     }
 }
 
+QVariant SimpleTimeline::preview(QString name, qreal time)
+{
+    //根据串名找到串
+    auto it = seqGroup.begin();
+    int flag = 0;
+    //判断是添加还是更新
+    int state = -1;
+    // 初始化位置为-1，表示未找到
+    int ani_position = -1;
+    // 根据名字从所有串中检索是否有串行动画组可用
+    while (it != seqGroup.end()){
+        if(it->seqGroupName == name)
+        {
+            flag = 1;
+            break;
+        }
+        it++;
+    }
+    if (flag == 1)
+    {
+        for (int i = 0; i < it->times.size(); ++i)
+        {
+            if (time == it->times[i]){
+                state = i;
+            }
+            if (time >= it->times[i]){
+                ani_position = i;
+            }
+        }
+    }else{
+        qDebug() << "没有对应的串";
+    }
+    //在最后一帧的后边
+    if(ani_position == it->times.size()-1){
+        qDebug() << "此处还没有动画";
+        QPoint p(1000,200);
+        QVariant myVariant = QVariant::fromValue(p);
+        return myVariant;
+    }else if (state == -1){
+        //不是关键帧，需要计算位置
+        QVariant startsite;
+        QVariant endsite;
+        QPoint p;
+        double progress;
+        qDebug() << "this point isn't a keyframe.";
+        //在第一帧前边，特殊处理
+        if (ani_position == -1){
+            startsite = QPoint(1000,200);
+            QPropertyAnimation *absAni = qobject_cast<QPropertyAnimation*>(it->seqAnimation->animationAt(0));
+            endsite = absAni->keyValueAt(1);
+            qDebug() << "absAni->keyValueAt(1)" << absAni->keyValueAt(1);
+            progress = time/it->times[0];
+        }else{
+            //在某两帧中间
+            QPropertyAnimation *absAnibefor = qobject_cast<QPropertyAnimation*>(it->seqAnimation->animationAt(ani_position));
+            QPropertyAnimation *absAniafter = qobject_cast<QPropertyAnimation*>(it->seqAnimation->animationAt(ani_position+1));
+            startsite = absAnibefor->keyValueAt(1);
+            endsite = absAniafter->keyValueAt(1);
+            qDebug() << "absAnibefor->keyValueAt(1)" << absAnibefor->keyValueAt(1);
+            qDebug() << "absAniafter->keyValueAt(1)" << absAniafter->keyValueAt(1);
+            progress = (time - it->times[ani_position])/absAniafter->duration();
+        }
+        qDebug() << "progress:===============" << progress;
+        float x = (1 - progress) * startsite.value<qreal>() + endsite.value<qreal>() * progress;
+//        float y = (1 - progress) * startsite.value<QPoint>().y() + endsite.value<QPoint>().y() * progress;
+        qDebug() << x;
+//        qDebug() << startsite.value<QPoint>().y();
+//        qDebug() << y;
+        p.setX(x);
+//        p.setY(y);
+        QVariant myVariant = QVariant::fromValue(p);
+        return myVariant;
+    }else{
+        qDebug() << "this point is a keyframe.";
+        QPropertyAnimation *absAni = qobject_cast<QPropertyAnimation*>(it->seqAnimation->animationAt(state));
+        return absAni->keyValueAt(1);
+    }
+}
+
 void SimpleTimeline::addFrameButton(QObject *target, const QByteArray &propertyName, QString name, const QVariant &value, int type, qreal time)
 {
     //根据串名找到串
@@ -296,20 +353,39 @@ void SimpleTimeline::stop()
     parGroup.stop();
 }
 
+void SimpleTimeline::setrecordstate(int state){
+    recordstate = state;
+    emit recordstateChanged(state);
+}
+
+int SimpleTimeline::getrecordstate(){
+    return recordstate;
+}
+
+float SimpleTimeline::getxnum(){
+    return xnum;
+}
+
+void SimpleTimeline::setxnum(float x){
+    xnum = x;
+//    qDebug() << "set xnum.";
+//    emit xnumChanged();
+}
+
 
 // 在析构函数中记得释放动态分配的内存，防止内存泄漏
 SimpleTimeline::~SimpleTimeline()
 {
-//    // 释放动态分配的 QPropertyAnimation 对象
-//    for (QPropertyAnimation* anim : animation)
-//    {
-//        delete anim;
-//    }
+    // 释放动态分配的 QPropertyAnimation 对象
+    for (QPropertyAnimation* anim : animation)
+    {
+        delete anim;
+    }
 
-//    // 释放动态分配的 QSequentialAnimationGroup 对象
-//    for (auto it = seqGroup.begin(); it != seqGroup.end(); ++it) {
-//        delete it->seqAnimation;  // 释放 QSequentialAnimationGroup
-//        seqGroup.erase(it++);
-//    }
-//    seqGroup.clear();  // 清空 map
+    // 释放动态分配的 QSequentialAnimationGroup 对象
+    for (auto it = seqGroup.begin(); it != seqGroup.end(); ++it) {
+        delete it->seqAnimation;  // 释放 QSequentialAnimationGroup
+        seqGroup.erase(it++);
+    }
+    seqGroup.clear();  // 清空 map
 }
